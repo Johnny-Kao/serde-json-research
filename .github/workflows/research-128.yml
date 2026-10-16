@@ -47,3 +47,15 @@ jobs:
               target/release/examples/research_integer128_bench
             fi
           done
+
+  msrv:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.71.0
+      - run: cargo +1.71.0 check --no-default-features --features alloc
+      - run: cargo +1.71.0 check --features arbitrary_precision
+      - run: cargo +1.71.0 test --test research_integer128
