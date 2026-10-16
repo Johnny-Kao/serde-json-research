@@ -38,15 +38,34 @@ jobs:
           cp examples/research_integer128_bench.rs /tmp/serde-baseline/examples/
           cargo build --release --example research_integer128_bench
           cargo build --release --example research_integer128_bench --manifest-path /tmp/serde-baseline/Cargo.toml
-      - name: Paired A/B measurements
+      - name: Runner environment
         run: |
-          for variant in baseline candidate candidate baseline; do
-            if [ "$variant" = baseline ]; then
-              /tmp/serde-baseline/target/release/examples/research_integer128_bench
+          uname -a
+          lscpu | grep -E 'Model name|CPU\(s\)|Architecture|Thread|Socket|MHz' || true
+          free -m
+          rustc --version
+          git rev-parse HEAD
+          git -C /tmp/serde-baseline rev-parse HEAD
+      - name: Repeated paired A/B with unaffected u64 control
+        run: |
+          set -eu
+          for round in 1 2 3 4 5 6; do
+            if [ $((round % 2)) -eq 1 ]; then
+              order="baseline candidate candidate baseline"
             else
-              target/release/examples/research_integer128_bench
+              order="candidate baseline baseline candidate"
             fi
+            for variant in $order; do
+              echo "BEGIN_PAIR round=$round variant=$variant"
+              if [ "$variant" = baseline ]; then
+                /tmp/serde-baseline/target/release/examples/research_integer128_bench
+              else
+                target/release/examples/research_integer128_bench
+              fi
+              echo "END_PAIR round=$round variant=$variant"
+            done
           done
+
 
   msrv:
     runs-on: ubuntu-latest
@@ -58,4 +77,5 @@ jobs:
           toolchain: 1.71.0
       - run: cargo +1.71.0 check --no-default-features --features alloc
       - run: cargo +1.71.0 check --features arbitrary_precision
-      - run: cargo +1.71.0 test --test research_integer128
+      - name: MSRV regression build (no dev-dependency resolution)
+        run: cargo +1.71.0 check --lib --no-default-features --features alloc,arbitrary_precision
