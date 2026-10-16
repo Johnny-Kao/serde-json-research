@@ -79,3 +79,27 @@ jobs:
       - run: cargo +1.71.0 check --features arbitrary_precision
       - name: MSRV regression build (no dev-dependency resolution)
         run: cargo +1.71.0 check --lib --no-default-features --features alloc,arbitrary_precision
+
+  feature-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Formatting
+        run: cargo fmt --all -- --check
+      - name: Feature combinations
+        run: |
+          cargo test --features preserve_order
+          cargo test --features float_roundtrip
+          cargo test --features arbitrary_precision
+          cargo test --features raw_value
+          cargo test --features unbounded_depth
+          cargo test --all-features
+          cargo check --no-default-features --features alloc
+          cargo check --no-default-features --features alloc,arbitrary_precision
+          cargo check --no-default-features --features alloc,raw_value
+      - name: Clippy
+        run: cargo clippy --lib --all-features -- -D warnings
