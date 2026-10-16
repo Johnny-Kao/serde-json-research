@@ -1,0 +1,18 @@
+name: Research 128-bit parser
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Cargo tests
+        run: cargo test --lib --locked
+      - name: Feature tests
+        run: cargo test --lib --features arbitrary_precision,float_roundtrip --locked
+      - name: MSRV compatible check
+        run: cargo check --no-default-features --features alloc
