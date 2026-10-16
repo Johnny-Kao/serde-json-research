@@ -415,7 +415,7 @@ impl<'de, R: Read<'de>> Deserializer<R> {
                 let mut value = Some((c - b'0') as u128);
                 while let c @ b'0'..=b'9' = tri!(self.peek_or_null()) {
                     self.eat_char();
-                    value = value.and_then(|n| n.checked_mul(10)?.checked_add((c - b'0') as u128));
+                    value = value.and_then(|n| n.checked_mul(10)).and_then(|n| n.checked_add((c - b'0') as u128));
                 }
                 Ok(value)
             }
