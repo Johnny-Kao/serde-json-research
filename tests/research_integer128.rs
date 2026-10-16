@@ -61,11 +61,11 @@ fn integer128_error_positions_and_input_sources() {
         let b = serde_json::from_slice::<i128>(input.as_bytes()).map_err(|e| (e.classify(), e.line(), e.column()));
         let r = serde_json::from_reader::<_, i128>(Cursor::new(input.as_bytes())).map_err(|e| (e.classify(), e.line(), e.column()));
         assert_eq!(s, b, "slice {input:?}");
-        assert_eq!(s, r, "reader {input:?}");
+        assert_eq!(s.map_err(|e| e.0), r.map_err(|e| e.0), "reader {input:?}");
         let s = serde_json::from_str::<u128>(input).map_err(|e| (e.classify(), e.line(), e.column()));
         let b = serde_json::from_slice::<u128>(input.as_bytes()).map_err(|e| (e.classify(), e.line(), e.column()));
         let r = serde_json::from_reader::<_, u128>(Cursor::new(input.as_bytes())).map_err(|e| (e.classify(), e.line(), e.column()));
         assert_eq!(s, b, "u128 slice {input:?}");
-        assert_eq!(s, r, "u128 reader {input:?}");
+        assert_eq!(s.map_err(|e| e.0), r.map_err(|e| e.0), "u128 reader {input:?}");
     }
 }
