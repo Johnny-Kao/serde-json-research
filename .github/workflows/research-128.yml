@@ -26,6 +26,7 @@ jobs:
         run: cargo check --no-default-features --features alloc
       - name: Exact baseline differential across inputs and readers
         run: |
+          mkdir -p /tmp/serde-baseline/examples
           cp examples/research_integer128_diff.rs /tmp/serde-baseline/examples/
           cargo run --release --example research_integer128_diff --manifest-path /tmp/serde-baseline/Cargo.toml --quiet > /tmp/baseline-results.txt
           cargo run --release --example research_integer128_diff --quiet > /tmp/candidate-results.txt
