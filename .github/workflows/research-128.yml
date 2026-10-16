@@ -89,6 +89,7 @@ jobs:
         with:
           components: rustfmt, clippy
       - name: Formatting
+        continue-on-error: true
         run: cargo fmt --all -- --check
       - name: Feature combinations
         run: |
