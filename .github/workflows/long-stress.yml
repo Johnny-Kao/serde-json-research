@@ -1,0 +1,31 @@
+name: Long integer resource stress
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - run: |
+          git worktree add /tmp/serde-baseline origin/master
+          mkdir -p /tmp/serde-baseline/examples
+          cp examples/research_long_stress.rs /tmp/serde-baseline/examples/
+          cargo build --release --example research_long_stress
+          cargo build --release --example research_long_stress --manifest-path /tmp/serde-baseline/Cargo.toml
+      - name: Paired long-digit stress with resource counters
+        run: |
+          lscpu | grep 'Model name:'
+          for variant in baseline candidate candidate baseline; do
+            echo "VARIANT=$variant"
+            if [ "$variant" = baseline ]; then
+              /usr/bin/time -v /tmp/serde-baseline/target/release/examples/research_long_stress
+            else
+              /usr/bin/time -v target/release/examples/research_long_stress
+            fi
+          done
