@@ -1,0 +1,43 @@
+name: Short i128 root cause
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    strategy:
+      fail-fast: false
+      matrix:
+        sample: [1, 2]
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+      - run: git worktree add /tmp/serde-baseline origin/master
+      - run: |
+          mkdir -p /tmp/serde-baseline/examples
+          cp examples/research_short_no_allocator.rs /tmp/serde-baseline/examples/
+          cargo build --release --example research_short_no_allocator
+          cargo build --release --example research_short_no_allocator --manifest-path /tmp/serde-baseline/Cargo.toml
+      - name: Matched warmed samples
+        run: |
+          lscpu | grep 'Model name:'
+          rustc --version
+          for round in 1 2 3 4 5 6; do
+            if [ $((round % 2)) -eq 1 ]; then
+              order="baseline candidate candidate baseline"
+            else
+              order="candidate baseline baseline candidate"
+            fi
+            for variant in $order; do
+              echo "PAIR round=$round variant=$variant"
+              if [ "$variant" = baseline ]; then
+                /tmp/serde-baseline/target/release/examples/research_short_no_allocator
+              else
+                target/release/examples/research_short_no_allocator
+              fi
+            done
+          done
