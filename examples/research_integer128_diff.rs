@@ -14,16 +14,29 @@ fn inspect<T: serde::de::DeserializeOwned + std::fmt::Debug>(text: &str, mode: u
 
 fn main() {
     let mut inputs: Vec<String> = vec![
-        "".into(), " ".into(), "0".into(), "-0".into(), "1".into(),
-        "-1".into(), "01".into(), "-01".into(), "-".into(), "+1".into(),
-        "1e2".into(), "1.0".into(), "1e".into(), "-1e2".into(),
+        "".into(),
+        " ".into(),
+        "0".into(),
+        "-0".into(),
+        "1".into(),
+        "-1".into(),
+        "01".into(),
+        "-01".into(),
+        "-".into(),
+        "+1".into(),
+        "1e2".into(),
+        "1.0".into(),
+        "1e".into(),
+        "-1e2".into(),
         "170141183460469231731687303715884105727".into(),
         "170141183460469231731687303715884105728".into(),
         "-170141183460469231731687303715884105728".into(),
         "-170141183460469231731687303715884105729".into(),
         "340282366920938463463374607431768211455".into(),
         "340282366920938463463374607431768211456".into(),
-        "1x".into(), "1 2".into(), "1\n2".into(),
+        "1x".into(),
+        "1 2".into(),
+        "1\n2".into(),
         "9999999999999999999999999999999999999999999999999999999999x".into(),
     ];
     for n in 1..=90 {
@@ -41,14 +54,20 @@ fn main() {
         state ^= state << 17;
         let n = (state as usize % 100) + 1;
         let mut s = String::new();
-        if state & 1 != 0 { s.push('-'); }
+        if state & 1 != 0 {
+            s.push('-');
+        }
         let mut value = state;
         for _ in 0..n {
             value = value.wrapping_mul(6364136223846793005).wrapping_add(1);
             s.push(char::from(b'0' + (value % 10) as u8));
         }
-        if state & 4 != 0 { s.push('x'); }
-        if state & 8 != 0 { s.push_str(".0"); }
+        if state & 4 != 0 {
+            s.push('x');
+        }
+        if state & 8 != 0 {
+            s.push_str(".0");
+        }
         inputs.push(s);
     }
     for (id, input) in inputs.iter().enumerate() {

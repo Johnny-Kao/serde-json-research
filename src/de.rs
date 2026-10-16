@@ -369,7 +369,13 @@ impl<'de, R: Read<'de>> Deserializer<R> {
         let magnitude = tri!(self.scan_integer128());
         let limit = (i128::MAX as u128) + u128::from(negative);
         let int = match magnitude {
-            Some(n) if n <= limit => if negative { (n as i128).wrapping_neg() } else { n as i128 },
+            Some(n) if n <= limit => {
+                if negative {
+                    (n as i128).wrapping_neg()
+                } else {
+                    n as i128
+                }
+            }
             _ => return Err(self.error(ErrorCode::NumberOutOfRange)),
         };
 
@@ -415,7 +421,9 @@ impl<'de, R: Read<'de>> Deserializer<R> {
                 let mut value = Some((c - b'0') as u128);
                 while let c @ b'0'..=b'9' = tri!(self.peek_or_null()) {
                     self.eat_char();
-                    value = value.and_then(|n| n.checked_mul(10)).and_then(|n| n.checked_add((c - b'0') as u128));
+                    value = value
+                        .and_then(|n| n.checked_mul(10))
+                        .and_then(|n| n.checked_add((c - b'0') as u128));
                 }
                 Ok(value)
             }

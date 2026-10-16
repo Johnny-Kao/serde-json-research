@@ -38,10 +38,12 @@ fn bench<T: serde::de::DeserializeOwned>(label: &str, source: &str) {
         black_box(serde_json::from_str::<T>(black_box(source)).unwrap());
     }
     let elapsed = start.elapsed();
-    println!("{label},ns_per_op={:.2},alloc_per_op={:.4},bytes_per_op={:.2}",
+    println!(
+        "{label},ns_per_op={:.2},alloc_per_op={:.4},bytes_per_op={:.2}",
         elapsed.as_nanos() as f64 / ITERS as f64,
         ALLOCS.load(Ordering::Relaxed) as f64 / ITERS as f64,
-        BYTES.load(Ordering::Relaxed) as f64 / ITERS as f64);
+        BYTES.load(Ordering::Relaxed) as f64 / ITERS as f64
+    );
 }
 
 fn main() {
