@@ -12,6 +12,12 @@ jobs:
         with:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
+      - name: Baseline diagnostics preflight
+        run: |
+          git worktree add /tmp/serde-baseline origin/master
+          mkdir -p /tmp/serde-baseline/tests
+          cp tests/research_integer128.rs /tmp/serde-baseline/tests/
+          cargo test --manifest-path /tmp/serde-baseline/Cargo.toml --test research_integer128 integer128_error_positions_and_input_sources -- --nocapture || true
       - name: Cargo tests
         run: cargo test
       - name: Feature tests
@@ -20,7 +26,6 @@ jobs:
         run: cargo check --no-default-features --features alloc
       - name: Prepare baseline and release binaries
         run: |
-          git worktree add /tmp/serde-baseline origin/master
           mkdir -p /tmp/serde-baseline/examples
           cp examples/research_integer128_bench.rs /tmp/serde-baseline/examples/
           cargo build --release --example research_integer128_bench
