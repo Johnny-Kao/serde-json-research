@@ -9,6 +9,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
       - name: Cargo tests
         run: cargo test
@@ -16,3 +18,19 @@ jobs:
         run: cargo test --lib --features arbitrary_precision,float_roundtrip
       - name: MSRV compatible check
         run: cargo check --no-default-features --features alloc
+      - name: Prepare baseline and release binaries
+        run: |
+          git worktree add /tmp/serde-baseline origin/master
+          mkdir -p /tmp/serde-baseline/examples
+          cp examples/research_integer128_bench.rs /tmp/serde-baseline/examples/
+          cargo build --release --example research_integer128_bench
+          cargo build --release --example research_integer128_bench --manifest-path /tmp/serde-baseline/Cargo.toml
+      - name: Paired A/B measurements
+        run: |
+          for variant in baseline candidate candidate baseline; do
+            if [ "$variant" = baseline ]; then
+              /tmp/serde-baseline/target/release/examples/research_integer128_bench
+            else
+              target/release/examples/research_integer128_bench
+            fi
+          done
