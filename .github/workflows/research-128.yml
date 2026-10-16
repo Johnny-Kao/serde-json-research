@@ -17,7 +17,7 @@ jobs:
           git worktree add /tmp/serde-baseline origin/master
           mkdir -p /tmp/serde-baseline/tests
           cp tests/research_integer128.rs /tmp/serde-baseline/tests/
-          cargo test --manifest-path /tmp/serde-baseline/Cargo.toml --test research_integer128 integer128_error_positions_and_input_sources -- --nocapture || true
+          cargo test --manifest-path /tmp/serde-baseline/Cargo.toml --test research_integer128 integer128_error_positions_and_input_sources -- --nocapture
       - name: Cargo tests
         run: cargo test
       - name: Feature tests
