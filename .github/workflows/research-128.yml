@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Cargo tests
-        run: cargo test --lib --locked
+        run: cargo test --locked
       - name: Feature tests
         run: cargo test --lib --features arbitrary_precision,float_roundtrip --locked
       - name: MSRV compatible check
